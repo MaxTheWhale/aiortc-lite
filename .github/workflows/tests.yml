@@ -59,4 +59,9 @@ jobs:
       - name: Install packages
         run: pip install build wheel
       - name: Build package
-        run: python -m build
+        run: python -m build --wheel
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aiortc-lite
+          path: dist/aiortc_lite-1.13.0-py3-none-any.whl
