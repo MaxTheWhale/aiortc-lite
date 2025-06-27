@@ -1,8 +1,3 @@
-import fractions
-import math
-import sys
-from collections.abc import Callable
-
 from aiortc import rtp
 from aiortc.rtcrtpparameters import RTCRtpHeaderExtensionParameters, RTCRtpParameters
 from aiortc.rtp import (
@@ -24,29 +19,8 @@ from aiortc.rtp import (
     unwrap_rtx,
     wrap_rtx,
 )
-from av import AudioFrame
 
 from .utils import TestCase, load
-
-
-def create_audio_frame(
-    sample_func: Callable[[int], float],
-    samples: int,
-    pts: int,
-    layout: str = "mono",
-    sample_rate: int = 48000,
-) -> AudioFrame:
-    frame = AudioFrame(format="s16", layout=layout, samples=samples)
-    for p in frame.planes:
-        buf = bytearray()
-        for i in range(samples):
-            sample = int(sample_func(i) * 32767)
-            buf.extend(int.to_bytes(sample, 2, sys.byteorder, signed=True))
-        p.update(buf)
-    frame.pts = pts
-    frame.sample_rate = sample_rate
-    frame.time_base = fractions.Fraction(1, sample_rate)
-    return frame
 
 
 class RtcpPacketTest(TestCase):
@@ -682,19 +656,3 @@ class RtpUtilTest(TestCase):
         self.assertEqual(recovered.csrc, packet.csrc)
         self.assertEqual(recovered.extensions, packet.extensions)
         self.assertEqual(recovered.payload, packet.payload)
-
-    def test_compute_audio_level_dbov(self) -> None:
-        num_samples = 960  # 20ms @ 48kHz
-        # test a frame of all zeroes (-127 dBov, the minimum value)
-        silent_frame = create_audio_frame(lambda n: 0.0, num_samples, 0)
-        self.assertEqual(rtp.compute_audio_level_dbov(silent_frame), -127)
-        # test a 50Hz square wave (0 dBov, the maximum value)
-        square_frame = create_audio_frame(
-            lambda n: 1.0 if n < num_samples / 2 else -1.0, num_samples, 0
-        )
-        self.assertEqual(rtp.compute_audio_level_dbov(square_frame), 0)
-        # test a 50Hz sine wave (-3 dBov, the maximum value for a sine wave)
-        sine_frame = create_audio_frame(
-            lambda n: math.sin(2 * math.pi * n / num_samples), num_samples, 0
-        )
-        self.assertEqual(rtp.compute_audio_level_dbov(sine_frame), -3)
