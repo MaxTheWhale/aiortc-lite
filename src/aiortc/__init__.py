@@ -28,14 +28,6 @@ from .rtcrtpparameters import (
 )
 from .rtcsctptransport import RTCSctpCapabilities, RTCSctpTransport
 from .rtcsessiondescription import RTCSessionDescription
-from .stats import (
-    RTCInboundRtpStreamStats,
-    RTCOutboundRtpStreamStats,
-    RTCRemoteInboundRtpStreamStats,
-    RTCRemoteOutboundRtpStreamStats,
-    RTCStatsReport,
-    RTCTransportStats,
-)
 
 __version__ = "1.13.0"
 
@@ -57,11 +49,7 @@ __all__ = [
     "RTCIceParameters",
     "RTCIceServer",
     "RTCIceTransport",
-    "RTCInboundRtpStreamStats",
-    "RTCOutboundRtpStreamStats",
     "RTCPeerConnection",
-    "RTCRemoteInboundRtpStreamStats",
-    "RTCRemoteOutboundRtpStreamStats",
     "RTCRtcpParameters",
     "RTCRtpCapabilities",
     "RTCRtpCodecCapability",
@@ -70,12 +58,8 @@ __all__ = [
     "RTCRtpHeaderExtensionCapability",
     "RTCRtpHeaderExtensionParameters",
     "RTCRtpParameters",
-    "RTCRtpReceiver",
-    "RTCRtpSender",
     "RTCRtpSynchronizationSource",
     "RTCSctpCapabilities",
     "RTCSctpTransport",
     "RTCSessionDescription",
-    "RTCStatsReport",
-    "RTCTransportStats",
 ]

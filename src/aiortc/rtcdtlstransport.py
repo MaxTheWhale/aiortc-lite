@@ -31,7 +31,6 @@ from .rtp import (
     RtpPacket,
     is_rtcp,
 )
-from .stats import RTCStatsReport, RTCTransportStats
 
 CERTIFICATE_T = TypeVar("CERTIFICATE_T", bound="RTCCertificate")
 K = TypeVar("K")
@@ -361,7 +360,6 @@ class RTCDtlsTransport(AsyncIOEventEmitter):
         self._rtp_header_extensions_map = rtp.HeaderExtensionsMap()
         self._rtp_router = RtpRouter()
         self._state = State.NEW
-        self._stats_id = "transport_" + str(id(self))
         self._task: Optional[asyncio.Future[None]] = None
         self._transport = transport
 
@@ -577,25 +575,6 @@ class RTCDtlsTransport(AsyncIOEventEmitter):
             raise exc
         finally:
             self._set_state(State.CLOSED)
-
-    def _get_stats(self) -> RTCStatsReport:
-        report = RTCStatsReport()
-        report.add(
-            RTCTransportStats(
-                # RTCStats
-                timestamp=clock.current_datetime(),
-                type="transport",
-                id=self._stats_id,
-                # RTCTransportStats,
-                packetsSent=self.__tx_packets,
-                packetsReceived=self.__rx_packets,
-                bytesSent=self.__tx_bytes,
-                bytesReceived=self.__rx_bytes,
-                iceRole=self.transport.role,
-                dtlsState=self.state,
-            )
-        )
-        return report
 
     async def _handle_rtcp_data(self, data: bytes) -> None:
         try:

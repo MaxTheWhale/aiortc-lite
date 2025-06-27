@@ -19,7 +19,6 @@ from .rtcicetransport import (
 from .rtcrtpparameters import RTCRtpHeaderExtensionParameters
 from .rtcsctptransport import RTCSctpCapabilities, RTCSctpTransport
 from .rtcsessiondescription import RTCSessionDescription
-from .stats import RTCStatsReport
 
 DISCARD_HOST = "0.0.0.0"
 DISCARD_PORT = 9
@@ -150,12 +149,8 @@ class RTCPeerConnection(AsyncIOEventEmitter):
         self.__configuration = configuration or RTCConfiguration()
         self.__dtlsTransports: set[RTCDtlsTransport] = set()
         self.__iceTransports: set[RTCIceTransport] = set()
-        self.__remoteDtls: dict[
-            RTCSctpTransport, RTCDtlsParameters
-        ] = {}
-        self.__remoteIce: dict[
-            RTCSctpTransport, RTCIceParameters
-        ] = {}
+        self.__remoteDtls: dict[RTCSctpTransport, RTCDtlsParameters] = {}
+        self.__remoteIce: dict[RTCSctpTransport, RTCIceParameters] = {}
         self.__seenMids: set[str] = set()
         self.__sctp: Optional[RTCSctpTransport] = None
         self.__sctp_mline_index: Optional[int] = None
@@ -451,20 +446,6 @@ class RTCPeerConnection(AsyncIOEventEmitter):
 
         return wrap_session_description(description)
 
-    async def getStats(self) -> RTCStatsReport:
-        """
-        Returns statistics for the connection.
-
-        :rtype: :class:`RTCStatsReport`
-        """
-        merged = RTCStatsReport()
-        coros = [x.getStats() for x in self.getSenders()] + [
-            x.getStats() for x in self.getReceivers()
-        ]
-        for report in await asyncio.gather(*coros):
-            merged.update(report)
-        return merged
-
     async def setLocalDescription(
         self, sessionDescription: Optional[RTCSessionDescription] = None
     ) -> None:
@@ -568,7 +549,6 @@ class RTCPeerConnection(AsyncIOEventEmitter):
 
         # apply description
         iceCandidates: dict[RTCIceTransport, sdp.MediaDescription] = {}
-        trackEvents = []
         for i, media in enumerate(description.media):
             dtlsTransport: Optional[RTCDtlsTransport] = None
             self.__seenMids.add(media.rtp.muxId)
@@ -649,10 +629,6 @@ class RTCPeerConnection(AsyncIOEventEmitter):
             for iceTransport, media in iceCandidates.items()
         ]
         await asyncio.gather(*coros)
-
-        # FIXME: in aiortc 2.0.0 emit RTCTrackEvent directly
-        for event in trackEvents:
-            self.emit("track", event.track)
 
         # connect
         asyncio.ensure_future(self.__connect())

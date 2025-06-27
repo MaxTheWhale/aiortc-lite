@@ -95,29 +95,6 @@ class RTCCertificateTest(TestCase):
 
 
 class RTCDtlsTransportTest(TestCase):
-    def assertCounters(
-        self,
-        transport_a: RTCDtlsTransport,
-        transport_b: RTCDtlsTransport,
-        packets_sent_a: int,
-        packets_sent_b: int,
-    ) -> None:
-        stats_a = transport_a._get_stats()[transport_a._stats_id]
-        stats_b = transport_b._get_stats()[transport_b._stats_id]
-
-        self.assertEqual(stats_a.packetsSent, packets_sent_a)
-        self.assertEqual(stats_a.packetsReceived, packets_sent_b)
-        self.assertGreater(stats_a.bytesSent, 0)
-        self.assertGreater(stats_a.bytesReceived, 0)
-
-        self.assertEqual(stats_b.packetsSent, packets_sent_b)
-        self.assertEqual(stats_b.packetsReceived, packets_sent_a)
-        self.assertGreater(stats_b.bytesSent, 0)
-        self.assertGreater(stats_b.bytesReceived, 0)
-
-        self.assertEqual(stats_a.bytesSent, stats_b.bytesReceived)
-        self.assertEqual(stats_b.bytesSent, stats_a.bytesReceived)
-
     @asynctest
     async def test_data(self) -> None:
         transport1, transport2 = dummy_ice_transport_pair()
@@ -185,75 +162,6 @@ class RTCDtlsTransportTest(TestCase):
         # shutdown
         await session1.stop()
         await session2.stop()
-
-    @asynctest
-    async def test_rtp(self) -> None:
-        transport1, transport2 = dummy_ice_transport_pair()
-
-        certificate1 = RTCCertificate.generateCertificate()
-        session1 = RTCDtlsTransport(transport1, [certificate1])
-        receiver1 = DummyRtpReceiver()
-        session1._register_rtp_receiver(
-            receiver1,
-            RTCRtpReceiveParameters(
-                codecs=[
-                    RTCRtpCodecParameters(
-                        mimeType="audio/PCMU", clockRate=8000, payloadType=0
-                    )
-                ],
-                encodings=[RTCRtpDecodingParameters(ssrc=1831097322, payloadType=0)],
-            ),
-        )
-
-        certificate2 = RTCCertificate.generateCertificate()
-        session2 = RTCDtlsTransport(transport2, [certificate2])
-        receiver2 = DummyRtpReceiver()
-        session2._register_rtp_receiver(
-            receiver2,
-            RTCRtpReceiveParameters(
-                codecs=[
-                    RTCRtpCodecParameters(
-                        mimeType="audio/PCMU", clockRate=8000, payloadType=0
-                    )
-                ],
-                encodings=[RTCRtpDecodingParameters(ssrc=4028317929, payloadType=0)],
-            ),
-        )
-
-        await asyncio.gather(
-            session1.start(session2.getLocalParameters()),
-            session2.start(session1.getLocalParameters()),
-        )
-        self.assertCounters(session1, session2, 2, 2)
-
-        # send RTP
-        await session1._send_rtp(RTP)
-        await asyncio.sleep(0.1)
-        self.assertCounters(session1, session2, 3, 2)
-        self.assertEqual(len(receiver2.rtcp_packets), 0)
-        self.assertEqual(len(receiver2.rtp_packets), 1)
-
-        # send RTCP
-        await session2._send_rtp(RTCP)
-        await asyncio.sleep(0.1)
-        self.assertCounters(session1, session2, 3, 3)
-        self.assertEqual(len(receiver1.rtcp_packets), 1)
-        self.assertEqual(len(receiver1.rtp_packets), 0)
-
-        # shutdown
-        await session1.stop()
-        await asyncio.sleep(0.1)
-        self.assertCounters(session1, session2, 4, 3)
-        self.assertEqual(session1.state, "closed")
-        self.assertEqual(session2.state, "closed")
-
-        # try closing again
-        await session1.stop()
-        await session2.stop()
-
-        # try sending after close
-        with self.assertRaises(ConnectionError):
-            await session1._send_rtp(RTP)
 
     @asynctest
     async def test_rtp_malformed(self) -> None:

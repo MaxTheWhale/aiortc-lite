@@ -1,6 +1,5 @@
 # ruff: noqa: E501
 
-from typing import Any
 from unittest import TestCase
 
 from aiortc.rtcrtpparameters import (
