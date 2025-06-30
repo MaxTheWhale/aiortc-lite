@@ -5,27 +5,6 @@ ParametersDict = Dict[str, Union[int, str, None]]
 
 
 @dataclass
-class RTCRtpCodecCapability:
-    """
-    The :class:`RTCRtpCodecCapability` dictionary provides information on
-    codec capabilities.
-    """
-
-    mimeType: str
-    "The codec MIME media type/subtype, for instance `'audio/PCMU'`."
-    clockRate: int
-    "The codec clock rate expressed in Hertz."
-    channels: Optional[int] = None
-    "The number of channels supported (e.g. two for stereo)."
-    parameters: ParametersDict = field(default_factory=dict)
-    "Codec-specific parameters available for signaling."
-
-    @property
-    def name(self):
-        return self.mimeType.split("/")[1]
-
-
-@dataclass
 class RTCRtpCodecParameters:
     """
     The :class:`RTCRtpCodecParameters` dictionary provides information on
@@ -77,17 +56,6 @@ class RTCRtpEncodingParameters(RTCRtpCodingParameters):
 
 
 @dataclass
-class RTCRtpHeaderExtensionCapability:
-    """
-    The :class:`RTCRtpHeaderExtensionCapability` dictionary provides information
-    on a supported header extension.
-    """
-
-    uri: str
-    "The URI of the RTP header extension."
-
-
-@dataclass
 class RTCRtpHeaderExtensionParameters:
     """
     The :class:`RTCRtpHeaderExtensionParameters` dictionary enables a header
@@ -99,21 +67,6 @@ class RTCRtpHeaderExtensionParameters:
     "The value that goes in the packet."
     uri: str
     "The URI of the RTP header extension."
-
-
-@dataclass
-class RTCRtpCapabilities:
-    """
-    The :class:`RTCRtpCapabilities` dictionary provides information about
-    support codecs and header extensions.
-    """
-
-    codecs: List[RTCRtpCodecCapability] = field(default_factory=list)
-    "A list of :class:`RTCRtpCodecCapability`."
-    headerExtensions: List[RTCRtpHeaderExtensionCapability] = field(
-        default_factory=list
-    )
-    "A list of :class:`RTCRtpHeaderExtensionCapability`."
 
 
 @dataclass

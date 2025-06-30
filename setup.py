@@ -13,14 +13,8 @@ readme_file = os.path.join(root_dir, "README.rst")
 with open(readme_file, encoding="utf-8") as f:
     long_description = f.read()
 
-cffi_modules = [
-    "src/_cffi_src/build_opus.py:ffibuilder",
-    "src/_cffi_src/build_vpx.py:ffibuilder",
-]
 install_requires = [
     "aioice>=0.7.5,<0.8.0",
-    "av>=9.0.0,<11.0.0",
-    "cffi>=1.0.0",
     "cryptography>=2.2",
     'dataclasses; python_version < "3.7"',
     "google-crc32c>=1.1",
@@ -36,10 +30,6 @@ extras_require = {
         'numpy>=1.19.0',
     ]
 }
-
-# Do not build cffi modules on readthedocs as we lack the codec development files.
-if os.environ.get("READTHEDOCS") == "True":
-    cffi_modules = []
 
 setuptools.setup(
     name=about["__title__"],
@@ -64,11 +54,9 @@ setuptools.setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    cffi_modules=cffi_modules,
     package_dir={"": "src"},
-    packages=["aiortc", "aiortc.codecs", "aiortc.contrib"],
+    packages=["aiortc"],
     python_requires=">=3.7",
-    setup_requires=["cffi>=1.0.0"],
     install_requires=install_requires,
     extras_require=extras_require,
 )

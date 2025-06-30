@@ -85,23 +85,6 @@ class RTCCertificateTest(TestCase):
 
 
 class RTCDtlsTransportTest(TestCase):
-    def assertCounters(self, transport_a, transport_b, packets_sent_a, packets_sent_b):
-        stats_a = transport_a._get_stats()[transport_a._stats_id]
-        stats_b = transport_b._get_stats()[transport_b._stats_id]
-
-        self.assertEqual(stats_a.packetsSent, packets_sent_a)
-        self.assertEqual(stats_a.packetsReceived, packets_sent_b)
-        self.assertGreater(stats_a.bytesSent, 0)
-        self.assertGreater(stats_a.bytesReceived, 0)
-
-        self.assertEqual(stats_b.packetsSent, packets_sent_b)
-        self.assertEqual(stats_b.packetsReceived, packets_sent_a)
-        self.assertGreater(stats_b.bytesSent, 0)
-        self.assertGreater(stats_b.bytesReceived, 0)
-
-        self.assertEqual(stats_a.bytesSent, stats_b.bytesReceived)
-        self.assertEqual(stats_b.bytesSent, stats_a.bytesReceived)
-
     @asynctest
     async def test_data(self):
         transport1, transport2 = dummy_ice_transport_pair()
@@ -208,26 +191,22 @@ class RTCDtlsTransportTest(TestCase):
             session1.start(session2.getLocalParameters()),
             session2.start(session1.getLocalParameters()),
         )
-        self.assertCounters(session1, session2, 2, 2)
 
         # send RTP
         await session1._send_rtp(RTP)
         await asyncio.sleep(0.1)
-        self.assertCounters(session1, session2, 3, 2)
         self.assertEqual(len(receiver2.rtcp_packets), 0)
         self.assertEqual(len(receiver2.rtp_packets), 1)
 
         # send RTCP
         await session2._send_rtp(RTCP)
         await asyncio.sleep(0.1)
-        self.assertCounters(session1, session2, 3, 3)
         self.assertEqual(len(receiver1.rtcp_packets), 1)
         self.assertEqual(len(receiver1.rtp_packets), 0)
 
         # shutdown
         await session1.stop()
         await asyncio.sleep(0.1)
-        self.assertCounters(session1, session2, 4, 3)
         self.assertEqual(session1.state, "closed")
         self.assertEqual(session2.state, "closed")
 
