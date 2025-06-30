@@ -22,7 +22,7 @@ from typing import (
     no_type_check,
 )
 
-from google_crc32c import value as crc32c
+from crc32c import crc32c
 from pyee.asyncio import AsyncIOEventEmitter
 
 from .exceptions import InvalidStateError

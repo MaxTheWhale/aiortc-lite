@@ -206,7 +206,7 @@ class RTCIceGatherer(AsyncIOEventEmitter):
         """
         Return the list of default :class:`RTCIceServer`.
         """
-        return [RTCIceServer("stun:stun.l.google.com:19302")]
+        return []
 
     def getLocalCandidates(self) -> List[RTCIceCandidate]:
         """

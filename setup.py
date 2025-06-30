@@ -14,10 +14,10 @@ with open(readme_file, encoding="utf-8") as f:
     long_description = f.read()
 
 install_requires = [
-    "aioice>=0.7.5,<0.8.0",
+    "aioice>=0.8.0,<0.9.0",
     "cryptography>=2.2",
     'dataclasses; python_version < "3.7"',
-    "google-crc32c>=1.1",
+    "crc32c>=2.3",
     "pyee>=9.0.0",
     "pylibsrtp>=0.5.6",
     "pyopenssl>=23.0.0",

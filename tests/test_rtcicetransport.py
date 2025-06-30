@@ -256,7 +256,7 @@ class RTCIceGathererTest(TestCase):
     def test_default_ice_servers(self):
         self.assertEqual(
             RTCIceGatherer.getDefaultIceServers(),
-            [RTCIceServer(urls="stun:stun.l.google.com:19302")],
+            [],
         )
 
 
